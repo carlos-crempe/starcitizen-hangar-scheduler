@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hangar Status Tracker</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        text-align: center;
+      }
+      .semaphore {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      .led {
+        width: 20px;
+        height: 5px;
+        background-color: gray;
+        border: 1px solid black;
+      }
+      .green {
+        background-color: green;
+      }
+      .red {
+        background-color: red;
+      }
+      .controls {
+        margin-bottom: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+      }
+      th {
+        background-color: #f4f4f4;
+      }
+      .state-option {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        cursor: pointer;
+        padding: 10px;
+        margin-bottom: 5px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+      }
+      .state-option:hover {
+        background-color: #f0f0f0;
+      }
+      .state-selector-container {
+        display: none;
+        position: absolute;
+        top: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        margin-top: 10px;
+        max-width: 300px;
+        max-height: 200px;
+        overflow-y: auto;
+        background-color: white;
+        padding: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+      }
+      .state-selector-button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        margin-bottom: 20px;
+        border-radius: 5px;
+      }
+      .state-selector-button:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Hangar Status Tracker</h1>
+
+    <div class="controls">
+      <input
+        type="text"
+        id="shard-name"
+        placeholder="Enter shard name (max 10 chars)"
+        maxlength="10"
+      />
+      <button class="state-selector-button" onclick="toggleStateSelector()">
+        Select State
+      </button>
+      <div class="state-selector-container" id="state-selector-container">
+        <div id="state-options"></div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Shard Name</th>
+          <th>Last State</th>
+          <th>Last Updated</th>
+          <th>Curr State</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="shard-list"></tbody>
+    </table>
+
+    <script>
+      const allStates = [
+        [0, 0, 0, 0, 0],
+        [-1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, 1],
+        [-1, -1, -1, 1, 1],
+        [-1, -1, 1, 1, 1],
+        [-1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [0, 1, 1, 1, 1],
+        [0, 0, 1, 1, 1],
+        [0, 0, 0, 1, 1],
+        [0, 0, 0, 0, 1],
+      ];
+
+      const durations = [5, 23, 23, 23, 23, 23, 12, 12, 12, 12, 12]; // Duration of each state
+
+      let currentState = allStates[0]; // Default to the first state
+      let editingIndex = null;
+
+      // Render the state options (hidden initially)
+      function renderStateOptions() {
+        const stateOptionsContainer = document.getElementById("state-options");
+        stateOptionsContainer.innerHTML = "";
+
+        allStates.forEach((state, index) => {
+          const stateOption = document.createElement("div");
+          stateOption.className = "state-option";
+          stateOption.onclick = () => selectState(index);
+
+          // Create the LED pattern for this state
+          state.forEach((color, i) => {
+            const led = document.createElement("div");
+            led.className = `led ${
+              color === 1 ? "green" : color === -1 ? "red" : ""
+            }`;
+            stateOption.appendChild(led);
+          });
+
+          stateOptionsContainer.appendChild(stateOption);
+        });
+      }
+
+      // Toggle the visibility of the state selector
+      function toggleStateSelector() {
+        const container = document.getElementById("state-selector-container");
+        container.style.display =
+          container.style.display === "none" ? "block" : "none";
+      }
+
+      // Select a state and update the display and shard list
+      function selectState(stateIndex) {
+        currentState = allStates[stateIndex];
+        saveShard();
+        toggleStateSelector();
+      }
+
+      // Render the current state visually
+      function renderState(elementId, stateArray) {
+        const container = document.getElementById(elementId);
+        const leds = container.querySelectorAll(".led");
+        leds.forEach((led, index) => {
+          led.className = `led ${
+            stateArray[index] === 1
+              ? "green"
+              : stateArray[index] === -1
+              ? "red"
+              : ""
+          }`;
+        });
+      }
+
+      function calculateCurrentState(lastUpdated, lastState) {
+        const now = new Date();
+        const lastUpdatedTime = new Date(lastUpdated);
+        const elapsedTime = Math.floor((now - lastUpdatedTime) / 1000 / 60); // time in minutes
+
+        // Find the index of the current state by comparing the arrays directly
+        let currentStateIndex = allStates.findIndex((state) =>
+          state.every((value, i) => value === lastState[i])
+        );
+
+        // If the current state is not found (e.g., an invalid state), start from the beginning
+        if (currentStateIndex === -1) {
+          currentStateIndex = 0;
+        }
+
+        let currentState = allStates[currentStateIndex];
+        let timeRemaining = elapsedTime;
+        let currentStateDuration = getStateDuration(currentStateIndex);
+
+        // Iterate through states and subtract elapsed time to find the current state
+        while (timeRemaining >= currentStateDuration) {
+          // Move to the next state, and loop back to 0 if at the end
+          currentStateIndex = (currentStateIndex + 1) % allStates.length;
+          currentState = allStates[currentStateIndex];
+          timeRemaining -= currentStateDuration;
+          currentStateDuration = getStateDuration(currentStateIndex); // Update the duration after changing state
+        }
+
+        const currentStatus = getStatus(
+          currentStateIndex,
+          currentState,
+          timeRemaining
+        );
+
+        return {
+          currentStateIndex,
+          currentState,
+          timeRemaining,
+          currentStatus,
+        };
+      }
+
+      // Get the duration of a state (based on predefined durations)
+      function getStateDuration(stateIndex) {
+        return durations[stateIndex];
+      }
+
+      function getStatus(currentStateIndex, currentState, timeElapsed) {
+        // Determine if the hangar is open based on the current state (no red lights, at least one green light)
+        const isHangarOpen =
+          currentState.includes(1) && !currentState.includes(-1);
+
+        let timeUntilNextChange =
+          getStateDuration(currentStateIndex) - timeElapsed;
+        let nextStateIndex = (currentStateIndex + 1) % allStates.length;
+
+        while (true) {
+          const nextState = allStates[nextStateIndex];
+          const nextStateDuration = getStateDuration(nextStateIndex);
+
+          // Check for status change in the next state
+          const nextStateIsOpen =
+            nextState.includes(1) && !nextState.includes(-1);
+
+          if (isHangarOpen !== nextStateIsOpen) {
+            // State change detected
+            break;
+          }
+
+          // Accumulate time and move to the next state
+          timeUntilNextChange += nextStateDuration;
+          nextStateIndex = (nextStateIndex + 1) % allStates.length;
+        }
+
+        // Return the appropriate status message
+        return isHangarOpen
+          ? `Hangar open, will close in ${timeUntilNextChange} minute(s).`
+          : `Hangar closed, will open in ${timeUntilNextChange} minute(s).`;
+      }
+
+      // Save the shard's state
+      function saveShard() {
+        const shardName = document.getElementById("shard-name").value.trim();
+
+        const shardData = {
+          name: shardName || "Unnamed",
+          state: [...currentState],
+          lastUpdated: new Date().toLocaleString(),
+        };
+
+        let shards = JSON.parse(localStorage.getItem("shards")) || [];
+        const existingIndex = shards.findIndex(
+          (shard) => shard.name === shardData.name
+        );
+
+        if (existingIndex !== -1) {
+          // Update the existing shard
+          shards[existingIndex] = shardData;
+        } else if (editingIndex === null) {
+          // Add new shard if not editing
+          shards.push(shardData);
+        }
+
+        localStorage.setItem("shards", JSON.stringify(shards));
+        document.getElementById("shard-name").value = "";
+        renderShardList();
+        editingIndex = null; // Reset editing state
+      }
+
+      // Render saved shards in the table
+      function renderShardList() {
+        const shards = JSON.parse(localStorage.getItem("shards")) || [];
+        const shardList = document.getElementById("shard-list");
+        shardList.innerHTML = "";
+
+        shards.forEach((shard, index) => {
+          const row = document.createElement("tr");
+
+          const nameCell = document.createElement("td");
+          nameCell.textContent = shard.name;
+          row.appendChild(nameCell);
+
+          const stateCell = document.createElement("td");
+          const stateContainer = document.createElement("div");
+          stateContainer.className = "semaphore";
+          shard.state.forEach((color) => {
+            const led = document.createElement("div");
+            led.className = `led ${
+              color === 1 ? "green" : color === -1 ? "red" : ""
+            }`;
+            stateContainer.appendChild(led);
+          });
+          stateCell.appendChild(stateContainer);
+          row.appendChild(stateCell);
+
+          const updatedCell = document.createElement("td");
+          updatedCell.textContent = shard.lastUpdated;
+          row.appendChild(updatedCell);
+
+          const currentStateCell = document.createElement("td");
+          const currentStateContainer = document.createElement("div");
+          currentStateContainer.className = "semaphore";
+          const currentObj = calculateCurrentState(
+            shard.lastUpdated,
+            shard.state
+          ); // Calculate the current state
+          currentObj.currentState.forEach((color) => {
+            const led = document.createElement("div");
+            led.className = `led ${
+              color === 1 ? "green" : color === -1 ? "red" : ""
+            }`;
+            currentStateContainer.appendChild(led);
+          });
+          currentStateCell.appendChild(currentStateContainer);
+          row.appendChild(currentStateCell);
+
+          const statusCell = document.createElement("td");
+          statusCell.textContent = currentObj.currentStatus;
+          row.appendChild(statusCell);
+
+          const actionsCell = document.createElement("td");
+          const editButton = document.createElement("button");
+          editButton.textContent = "Edit";
+          editButton.onclick = () => editShard(index);
+          actionsCell.appendChild(editButton);
+
+          const removeButton = document.createElement("button");
+          removeButton.textContent = "Remove";
+          removeButton.onclick = () => removeShard(index);
+          actionsCell.appendChild(removeButton);
+
+          row.appendChild(actionsCell);
+          shardList.appendChild(row);
+        });
+      }
+
+      // Edit an existing shard
+      function editShard(index) {
+        const shards = JSON.parse(localStorage.getItem("shards")) || [];
+        const shard = shards[index];
+        document.getElementById("shard-name").value = shard.name;
+        editingIndex = index;
+      }
+
+      // Remove a shard
+      function removeShard(index) {
+        let shards = JSON.parse(localStorage.getItem("shards")) || [];
+        shards.splice(index, 1);
+        localStorage.setItem("shards", JSON.stringify(shards));
+        renderShardList();
+      }
+
+      // Initialize the app
+      renderStateOptions();
+      renderShardList();
+      // setInterval(renderShardList, 30000);
+    </script>
+  </body>
+</html>
