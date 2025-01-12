@@ -3,6 +3,8 @@
 
 The **Hangar Status Tracker** is a lightweight web application for monitoring and managing the status of hangars. It uses visual indicators (semaphore-style LEDs) to display the current state of each hangar and provides tools for adding, editing, and removing entries. This project is entirely implemented in HTML, CSS, and JavaScript, and leverages browser `localStorage` to persist data.
 
+![System Screenshot](/readme.jpeg?raw=true "Starcitizen Executive Hangar Status Tracker")
+
 ---
 
 ## Features
@@ -25,6 +27,7 @@ The **Hangar Status Tracker** is a lightweight web application for monitoring an
 ### 4. Status Calculation
 - The system automatically calculates the current state of the hangar based on the time elapsed since the last update.
 - Displays whether the hangar is open or closed, along with the time remaining until the next state change.
+- **⚠ ATENTION**: For accurate predictions and functionality, ensure the system is updated virtually at the same time the hangar status changes. Delayed updates may result in incorrect state calculations or predictions.
 
 ### 5. Persistent Storage
 - All shard data is stored in the browser using `localStorage`.
@@ -42,8 +45,7 @@ The **Hangar Status Tracker** is a lightweight web application for monitoring an
 
 ### Editing a Shard
 1. Click the **"Edit"** button next to the shard in the table.
-2. Modify the shard name or state using the input and selector.
-3. Save the changes.
+2. Modify the state using the selector.
 
 ### Removing a Shard
 - Click the **"Remove"** button next to the shard in the table.
@@ -84,8 +86,8 @@ No installation is required. Simply open the `index.html` file in a browser to r
 
 ## Roadmap
 - **Enhanced Styling**: Add more visually appealing themes.
-- **Export/Import Data**: Allow users to save or restore shard data via file.
-- **Real-Time Sync**: Enable multi-user synchronization.
+- **Optimize Layout**: Make it responsive/more mobile friendly
+- **Enable Notification**: Enable user notification when a Hangar is close to open.
 
 ---
 
