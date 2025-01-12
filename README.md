@@ -1,9 +1,8 @@
 
 # Starcitizen Executive Hangar Status Tracker
+![System Screenshot](/readme.jpeg?raw=true "Starcitizen Executive Hangar Status Tracker")
 
 The **Hangar Status Tracker** is a lightweight web application for monitoring and managing the status of hangars. It uses visual indicators (semaphore-style LEDs) to display the current state of each hangar and provides tools for adding, editing, and removing entries. This project is entirely implemented in HTML, CSS, and JavaScript, and leverages browser `localStorage` to persist data.
-
-![System Screenshot](/readme.jpeg?raw=true "Starcitizen Executive Hangar Status Tracker")
 
 ---
 
