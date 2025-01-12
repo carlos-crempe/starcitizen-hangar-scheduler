@@ -96,8 +96,8 @@
       <input
         type="text"
         id="shard-name"
-        placeholder="Enter shard name (max 10 chars)"
-        maxlength="10"
+        placeholder="Enter shard name / Identifier"
+        maxlength="25"
       />
       <button class="state-selector-button" onclick="toggleStateSelector()">
         Select State
@@ -280,7 +280,7 @@
         const shardData = {
           name: shardName || "Unnamed",
           state: [...currentState],
-          lastUpdated: new Date().toLocaleString(),
+          lastUpdated: new Date().toISOString(),
         };
 
         let shards = JSON.parse(localStorage.getItem("shards")) || [];
@@ -388,7 +388,7 @@
       // Initialize the app
       renderStateOptions();
       renderShardList();
-      // setInterval(renderShardList, 30000);
+      setInterval(renderShardList, 30000);
     </script>
   </body>
 </html>
