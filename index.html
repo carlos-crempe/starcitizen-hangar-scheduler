@@ -3,18 +3,60 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAA55JREFUWEfNl79v20YUx7/HH+LJkShRhihLRONY8g8EKlCjNVzAg2J4DToFXTp0zVCg6D+QbgWydgkyFB1adO2QMWPRwVMLNCiCFIaqKIpkxbIlOSJFSaSuOLkmz1Y7ms4DCEiHh3sfvnvv+46kWCwyXKORjY0Ntrq6CkJIpBjT6RTNZhNkd3eXtdttjEajSAF4sFKpBLK3t8c4CQeIOQ5UAcNRVRDGEPe8YHVMCMaUYmE4hCT4DjQNiueB+n6wOpIkjGMxuJJ74eXolEKWZcwyLwL8WKthh4Ul8Wkmg0Xfx+N+P9jgiSzjS8vCfr2OJWHbbdPEJ7aNB7YdrD6iFN8sGWh93gLOT9gDrB8saKo2D6A6DhRh0yHPAAA6mQSrE0IwoRT0UgYcTYPsedCEDIwlCROeAeKGAAygoJClfzNw7TWwvr7O1tbWIEniiV59PfIuaDQaIFwHeEHwJ0rjAJ7ngZTLZba8vDz7E7X1er2wC8bjcdTx57ug2OtBFzBeUAqFMZQEkTomBHVdR7nfR0zwfXbjBk7jY0wSYccotgI6ohhkBqEnA5LdJBRZmQf4tlbDlqAD9zMZGL6Ph4IOPJVlfG1ZeFKvwxQA7pom/irbsD8MdYD+SWE8N9C6d0kHfv4fHbhcB+edwQvm3PjM4AV72ZevcT8mvAD35Xv4gjbwfRRFmc2emRJWKhV2fHyM4XAYeQ3MZkGpVJrpAKeK0ni2arXamQ6k02mkUqko48N1XfApTDY3N1kymcTJyUmkAJqmYWFh4R3TgcrREfJCFT9NJECnU1QcJ8jO35KE/UwGnfc6EIUgVU3BTbgYmeHFRu2oSPQT6Ba74TScAplqBqqizuvAVy9f4rYA8NAwkPR9fHF6GgDsKwq+y+fx6uNXQDw8NfNXE3bWhr0h6ECVIl1P4/DOYQjgA4VfCv99H4iyCAId2NnZYYPBAPyJ0jjAysrKWRvyH/G4kM8ISLg6HhwcnAFYlgVdF8fQ1RPw6VutVkG2t7cZp+l2u1cfVYigqioKhcI7pgOfvX6NotCG36dSeL40xdv1twG7/EaGWTfRer/Fr7eBLf6+CMdwMLwVDjWtoUE/1HH00dGFNsz9lkNMjc3rwL1mE7eENP2k63hh+rBLYW9LHQnZRhbt221AC52NZwaGqSHcm+FHSKwZg/5GR+eDzgWA7B/ZeYBru5JtbW0x3pP8ThCl8WGUy+XO2jCfz8MwjCjjz8Yxb8N/AJTiyHt6zr6mAAAAAElFTkSuQmCC"
+    />
     <title>Hangar Status Tracker</title>
     <style>
       body {
         font-family: Arial, sans-serif;
         margin: 20px;
         text-align: center;
+        background-color: #ffffff;
+        color: #000000;
+        transition: background-color 0.3s, color 0.3s;
       }
+      body.dark-mode {
+        background-color: #121212;
+        color: #ffffff;
+      }
+      .dark-mode table th {
+        background-color: #333333;
+      }
+      .dark-mode .state-option:hover {
+        background-color: #444444;
+      }
+      .dark-mode .state-selector-container {
+        background-color: #222222;
+        box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+
+      button.alert {
+        background-color: #d32f2f;
+      }
+
+      button.alert:hover {
+        background-color: #b71c1c;
+      }
+
       .semaphore {
         display: flex;
         gap: 5px;
         justify-content: center;
-        margin-bottom: 20px;
       }
       .led {
         width: 20px;
@@ -28,9 +70,7 @@
       .red {
         background-color: red;
       }
-      .controls {
-        margin-bottom: 20px;
-      }
+
       table {
         width: 100%;
         border-collapse: collapse;
@@ -42,8 +82,16 @@
         padding: 8px;
         text-align: center;
       }
+      td button {
+        margin-left: 5px;
+      }
       th {
         background-color: #f4f4f4;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
       }
       .state-option {
         display: flex;
@@ -60,13 +108,9 @@
         background-color: #f0f0f0;
       }
       .state-selector-container {
-        display: none;
         position: absolute;
-        top: 60px;
-        left: 50%;
-        transform: translateX(-50%);
+        display: block;
         z-index: 1000;
-        margin-top: 10px;
         max-width: 300px;
         max-height: 200px;
         overflow-y: auto;
@@ -74,23 +118,33 @@
         padding: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         border-radius: 5px;
+        top: 78px;
+        left: 210px;
       }
-      .state-selector-button {
-        background-color: #4caf50;
-        color: white;
-        padding: 10px 20px;
-        border: none;
+
+      /* Collapse "Last Update" and "Update Time" on small screens */
+      @media (max-width: 600px) {
+        .collapsable {
+          display: none;
+        }
+      }
+
+      /* Add scroll behavior for the table */
+      .table-container {
+        overflow-x: auto;
+      }
+      .btn {
         cursor: pointer;
-        margin-bottom: 20px;
-        border-radius: 5px;
-      }
-      .state-selector-button:hover {
-        background-color: #45a049;
       }
     </style>
   </head>
-  <body>
+  <body class="dark-mode">
     <h1>Hangar Status Tracker</h1>
+    <!-- Dark Mode Toggle -->
+    <div style="float: right">
+      <span class="btn" onclick="resetLocalStorage()">♻️</span>
+      <span class="btn" onclick="toggleDarkMode()">🌓</span>
+    </div>
 
     <div class="controls">
       <input
@@ -99,23 +153,28 @@
         placeholder="Enter shard name / Identifier"
         maxlength="25"
       />
-      <button class="state-selector-button" onclick="toggleStateSelector()">
-        Select State
-      </button>
-      <div class="state-selector-container" id="state-selector-container">
+      <div
+        class="state-selector-container"
+        style="display: block; max-width: 300px; width: 300px"
+        id="state-selector-container"
+        onclick="toggleStateSelector()"
+      >
         <div id="state-options"></div>
       </div>
+      <span style="margin-left: 330px" class="btn" onclick="saveShard()">
+        &#9989;
+      </span>
     </div>
 
     <table>
       <thead>
         <tr>
-          <th>Shard Name</th>
-          <th>Last State</th>
-          <th>Last Updated</th>
+          <th>Identifier</th>
+          <th class="collapsable">Initial State</th>
+          <th class="collapsable">Last Updated</th>
           <th>Current State</th>
           <th>Status</th>
-          <th>Actions</th>
+          <th>&nbsp;</th>
         </tr>
       </thead>
       <tbody id="shard-list"></tbody>
@@ -166,7 +225,8 @@
 
       // Toggle the visibility of the state selector
       function toggleStateSelector() {
-        const container = document.getElementById("state-selector-container");
+        const container = document.getElementById("state-options");
+        renderStateOptions();
         container.style.display =
           container.style.display === "none" ? "block" : "none";
       }
@@ -178,18 +238,29 @@
         toggleStateSelector();
       }
 
-      // Render the current state visually
       function renderState(elementId, stateArray) {
         const container = document.getElementById(elementId);
-        const leds = container.querySelectorAll(".led");
-        leds.forEach((led, index) => {
-          led.className = `led ${
-            stateArray[index] === 1
-              ? "green"
-              : stateArray[index] === -1
-              ? "red"
-              : ""
-          }`;
+
+        // Clear the container before recreating the elements
+        const stateOption = document.createElement("div");
+        stateOption.className = "state-option";
+        stateOption.onclick = () => toggleStateSelector();
+
+        // Create and append new .led elements based on the stateArray
+        stateArray.forEach((state) => {
+          const led = document.createElement("div");
+          led.classList.add("led");
+
+          // Add color class based on the state
+          if (state === 1) {
+            led.classList.add("green");
+          } else if (state === -1) {
+            led.classList.add("red");
+          }
+
+          // Append the LED element to the container
+          stateOption.appendChild(led);
+          container.appendChild(stateOption);
         });
       }
 
@@ -276,30 +347,47 @@
       // Save the shard's state
       function saveShard() {
         const shardName = document.getElementById("shard-name").value.trim();
-
         const shardData = {
+          id: editingIndex !== null ? editingIndex : Date.now().toString(), // Use timestamp as unique ID
           name: shardName || "Unnamed",
           state: [...currentState],
           lastUpdated: new Date().toISOString(),
         };
 
         let shards = JSON.parse(localStorage.getItem("shards")) || [];
-        const existingIndex = shards.findIndex(
-          (shard) => shard.name === shardData.name
-        );
 
-        if (existingIndex !== -1) {
-          // Update the existing shard
-          shards[existingIndex] = shardData;
-        } else if (editingIndex === null) {
-          // Add new shard if not editing
+        if (editingIndex !== null) {
+          // Update the existing shard by id
+          const index = shards.findIndex((shard) => shard.id === editingIndex);
+          if (index !== -1) {
+            shards[index] = shardData;
+          }
+        } else {
+          // Add a new shard
           shards.push(shardData);
         }
 
         localStorage.setItem("shards", JSON.stringify(shards));
         document.getElementById("shard-name").value = "";
-        renderShardList();
         editingIndex = null; // Reset editing state
+        const container = document.getElementById("state-options");
+        container.style.display = "none";
+        renderShardList();
+      }
+
+      // Edit an existing shard
+      function editShard(index) {
+        const shards = JSON.parse(localStorage.getItem("shards")) || [];
+        const shard = shards.find((shard) => shard.id === index);
+        const stateOptionsContainer = document.getElementById("state-options");
+        stateOptionsContainer.innerHTML = "";
+        renderState("state-options", shard.state);
+        stateOptionsContainer.style.display = "block";
+
+        if (shard) {
+          document.getElementById("shard-name").value = shard.name;
+          editingIndex = shard.id; // Store the id for updating
+        }
       }
 
       // Render saved shards in the table
@@ -308,14 +396,15 @@
         const shardList = document.getElementById("shard-list");
         shardList.innerHTML = "";
 
-        shards.forEach((shard, index) => {
+        shards.forEach((shard) => {
           const row = document.createElement("tr");
 
           const nameCell = document.createElement("td");
-          nameCell.textContent = shard.name;
+          nameCell.textContent = shard.name || "Unnamed";
           row.appendChild(nameCell);
 
           const stateCell = document.createElement("td");
+          stateCell.className = "collapsable";
           const stateContainer = document.createElement("div");
           stateContainer.className = "semaphore";
           shard.state.forEach((color) => {
@@ -329,6 +418,7 @@
           row.appendChild(stateCell);
 
           const updatedCell = document.createElement("td");
+          updatedCell.className = "collapsable";
           updatedCell.textContent = shard.lastUpdated;
           row.appendChild(updatedCell);
 
@@ -338,7 +428,7 @@
           const currentObj = calculateCurrentState(
             shard.lastUpdated,
             shard.state
-          ); // Calculate the current state
+          );
           currentObj.currentState.forEach((color) => {
             const led = document.createElement("div");
             led.className = `led ${
@@ -354,14 +444,16 @@
           row.appendChild(statusCell);
 
           const actionsCell = document.createElement("td");
-          const editButton = document.createElement("button");
-          editButton.textContent = "Edit";
-          editButton.onclick = () => editShard(index);
+          const editButton = document.createElement("span");
+          editButton.className = "btn";
+          editButton.textContent = "✏️";
+          editButton.onclick = () => editShard(shard.id);
           actionsCell.appendChild(editButton);
 
-          const removeButton = document.createElement("button");
-          removeButton.textContent = "Remove";
-          removeButton.onclick = () => removeShard(index);
+          const removeButton = document.createElement("span");
+          removeButton.className = "btn";
+          removeButton.textContent = "🗑️";
+          removeButton.onclick = () => removeShard(shard.id);
           actionsCell.appendChild(removeButton);
 
           row.appendChild(actionsCell);
@@ -369,24 +461,43 @@
         });
       }
 
-      // Edit an existing shard
-      function editShard(index) {
-        const shards = JSON.parse(localStorage.getItem("shards")) || [];
-        const shard = shards[index];
-        document.getElementById("shard-name").value = shard.name;
-        editingIndex = index;
-      }
-
       // Remove a shard
-      function removeShard(index) {
+      function removeShard(id) {
         let shards = JSON.parse(localStorage.getItem("shards")) || [];
-        shards.splice(index, 1);
+        shards = shards.filter((shard) => shard.id !== id);
         localStorage.setItem("shards", JSON.stringify(shards));
         renderShardList();
       }
 
+      // Toggle Dark Mode
+      function toggleDarkMode() {
+        const body = document.body;
+        body.classList.toggle("dark-mode");
+
+        // Save preference to localStorage
+        const isDarkMode = body.classList.contains("dark-mode");
+        localStorage.setItem("dark-mode", isDarkMode ? "enabled" : "disabled");
+      }
+
+      // Load Dark Mode Preference on Page Load
+      window.onload = () => {
+        const darkModePreference = localStorage.getItem("dark-mode");
+        if (darkModePreference === "enabled") {
+          document.body.classList.add("dark-mode");
+        }
+      };
+
+      // Function to clear local storage and refresh the page
+      function resetLocalStorage() {
+        if (
+          confirm("Are you sure you want to reset? This will clear all data.")
+        ) {
+          localStorage.clear(); // Clear all local storage data
+          location.reload(); // Reload the page to update the UI
+        }
+      }
+
       // Initialize the app
-      renderStateOptions();
       renderShardList();
       setInterval(renderShardList, 30000);
     </script>
