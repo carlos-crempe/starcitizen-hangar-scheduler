@@ -411,6 +411,7 @@
 
         if (shard) {
           document.getElementById("shard-name").value = shard.name;
+          currentState = shard.state;
           editingIndex = shard.id; // Store the id for updating
         }
       }
