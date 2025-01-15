@@ -142,8 +142,18 @@
     <h1>Hangar Status Tracker</h1>
     <!-- Dark Mode Toggle -->
     <div style="float: right">
-      <span class="btn" onclick="resetLocalStorage()">♻️</span>
-      <span class="btn" onclick="toggleDarkMode()">🌓</span>
+      <span class="btn" title="Add Random data" onclick="populateLocalStorage()"
+        >🎲
+      </span>
+      <span
+        class="btn"
+        title="reset local storage"
+        onclick="resetLocalStorage()"
+        >♻️</span
+      >
+      <span class="btn" title="toogle dark mode" onclick="toggleDarkMode()"
+        >🌓</span
+      >
     </div>
 
     <div class="controls">
@@ -159,7 +169,7 @@
         id="state-selector-container"
         onclick="toggleStateSelector()"
       >
-        <div id="state-options"></div>
+        <div id="state-options" style="display: none"></div>
       </div>
       <span style="margin-left: 330px" class="btn" onclick="saveShard()">
         &#9989;
@@ -178,6 +188,21 @@
         </tr>
       </thead>
       <tbody id="shard-list"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6">
+            Need help? Check our
+            <a
+              class="btn"
+              href="https://github.com/carlos-crempe/starcitizen-hangar-scheduler"
+              target="_blank"
+              title="Hangar Status Tracker GitHub Repository"
+              >github repo</a
+            >
+            for detailed system funcionalities and usage.
+          </td>
+        </tr>
+      </tfoot>
     </table>
 
     <script>
@@ -446,12 +471,14 @@
           const actionsCell = document.createElement("td");
           const editButton = document.createElement("span");
           editButton.className = "btn";
+          editButton.title = "Edit " + shard.name;
           editButton.textContent = "✏️";
           editButton.onclick = () => editShard(shard.id);
           actionsCell.appendChild(editButton);
 
           const removeButton = document.createElement("span");
           removeButton.className = "btn";
+          removeButton.title = "Remove " + shard.name;
           removeButton.textContent = "🗑️";
           removeButton.onclick = () => removeShard(shard.id);
           actionsCell.appendChild(removeButton);
@@ -495,6 +522,55 @@
           localStorage.clear(); // Clear all local storage data
           location.reload(); // Reload the page to update the UI
         }
+      }
+
+      // Function to populate with test data
+
+      function populateLocalStorage() {
+        const getRandomTimestamp = () => {
+          const now = Date.now();
+          const twoHoursAgo = now - 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+          const randomTime = new Date(
+            Math.floor(Math.random() * (now - twoHoursAgo + 1)) + twoHoursAgo
+          );
+          return randomTime.toISOString();
+        };
+
+        const regions = ["au", "us", "ap", "eu"];
+
+        // Generate a random shard name in the format region-0XX
+        const getRandomShardName = () => {
+          const region = regions[Math.floor(Math.random() * regions.length)];
+          const number = Math.floor(Math.random() * (25 - 1 + 1)) * 10; // Random number between 10 and 25
+          return `${region}-${number.toString().padStart(3, "0")}`;
+        };
+
+        // Pick a random state from allStates
+        const getRandomState = () => {
+          return allStates[Math.floor(Math.random() * allStates.length)];
+        };
+
+        const testData = Array.from(
+          { length: Math.random() * (15 - 5 + 1) },
+          () => ({
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 5), // Unique ID
+            name: getRandomShardName(),
+            state: getRandomState(),
+            lastUpdated: getRandomTimestamp(),
+          })
+        );
+
+        // Retrieve existing shards or initialize an empty array
+        let shards = JSON.parse(localStorage.getItem("shards")) || [];
+
+        // Append test data to the shards array
+        shards = shards.concat(testData);
+
+        // Save the updated shards array back to local storage
+        localStorage.setItem("shards", JSON.stringify(shards));
+
+        console.log("Local storage populated with test data!");
+        renderShardList(); // Ensure the UI reflects the new data
       }
 
       // Initialize the app
