@@ -6,6 +6,10 @@ The **Hangar Status Tracker** is a lightweight web application for monitoring an
 
 ---
 
+## Check it now
+
+Live on github pages: [Hangar Status Tracker](https://carlos-crempe.github.io/starcitizen-hangar-scheduler/).
+
 ## Features
 
 ### 1. Semaphore Display
@@ -94,7 +98,7 @@ This project consists of a single HTML file with embedded CSS and JavaScript. Al
 
 ## Installation
 
-No installation is required. Simply open the `index.html` file in a browser to run the application.
+No installation is required. You can use it live on [github pages](https://carlos-crempe.github.io/starcitizen-hangar-scheduler/) or just download `index.html` file and open in a browser to run the application.
 
 ---
 
